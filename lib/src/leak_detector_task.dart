@@ -78,11 +78,13 @@ class DetectorTask extends _Task {
         if (leakedInstance != null && leakedInstance.id != "objects/null") {
           final start = DateTime.now();
           sink?.add(DetectorEvent(DetectorEventType.startAnalyze));
-          LeakedInfo? leakInfo = await compute(
-            LeakAnalyzer.analyze,
-            AnalyzeData(leakedInstance, LeakDetector.maxRetainingPath),
-            debugLabel: 'analyze',
-          );
+          // LeakedInfo? leakInfo = await compute(
+          //   LeakAnalyzer.analyze,
+          //   AnalyzeData(leakedInstance, LeakDetector.maxRetainingPath),
+          //   debugLabel: 'analyze',
+          // );
+          LeakedInfo? leakInfo = await LeakAnalyzer.analyze(AnalyzeData(leakedInstance, LeakDetector.maxRetainingPath));
+
           sink?.add(DetectorEvent(DetectorEventType.endAnalyze,
               data: DateTime.now().difference(start)));
           onLeaked?.call(leakInfo);

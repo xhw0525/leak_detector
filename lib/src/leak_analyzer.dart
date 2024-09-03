@@ -15,25 +15,30 @@ class LeakAnalyzer {
   ///
   /// run on subIsolate
   static Future<LeakedInfo?> analyze(AnalyzeData analyzeData) async {
-    final leakedInstance = analyzeData.leakedInstance;
-    final maxRetainingPath = analyzeData.maxRetainingPath;
-    if (leakedInstance?.id != null && maxRetainingPath != null) {
-      final retainingPath = await VmServerUtils()
-          .getRetainingPath(leakedInstance!.id!, maxRetainingPath);
-      if (retainingPath?.elements != null &&
-          retainingPath!.elements!.isNotEmpty) {
-        final retainingObjectList = retainingPath.elements!;
-        final stream = Stream.fromIterable(retainingObjectList)
-            .asyncMap<RetainingNode?>(_defaultAnalyzeNode);
-        List<RetainingNode> retainingPathList = [];
-        (await stream.toList()).forEach((e) {
-          if (e != null) {
-            retainingPathList.add(e);
-          }
-        });
+    try {
+      final leakedInstance = analyzeData.leakedInstance;
+      final maxRetainingPath = analyzeData.maxRetainingPath;
+      if (leakedInstance?.id != null && maxRetainingPath != null) {
+        final retainingPath = await VmServerUtils()
+            .getRetainingPath(leakedInstance!.id!, maxRetainingPath);
+        if (retainingPath?.elements != null &&
+            retainingPath!.elements!.isNotEmpty) {
+          final retainingObjectList = retainingPath.elements!;
+          final stream = Stream.fromIterable(retainingObjectList)
+              .asyncMap<RetainingNode?>(_defaultAnalyzeNode);
+          List<RetainingNode> retainingPathList = [];
+          (await stream.toList()).forEach((e) {
+            if (e != null) {
+              retainingPathList.add(e);
+            }
+          });
 
-        return LeakedInfo(retainingPathList, retainingPath.gcRootType);
+          return LeakedInfo(retainingPathList, retainingPath.gcRootType);
+        }
       }
+    } catch (e) {
+      assert(false, '引用链分析出错, 请先关闭内存泄露检测, 或联系dayo ==>$e');
+      print('$e');
     }
     return null;
   }
