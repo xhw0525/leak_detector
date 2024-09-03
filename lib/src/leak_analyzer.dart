@@ -196,7 +196,7 @@ class LeakAnalyzer {
       if (retainingObject.parentField != null && clazz != null) {
         //parentField source code location
         sourceCodeLocation =
-            await _getSourceCodeLocation(retainingObject.parentField!, clazz);
+            await _getSourceCodeLocation('${retainingObject.parentField}', clazz);
       }
 
       String? toString;
